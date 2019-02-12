@@ -76,10 +76,10 @@ int main(void)
     insert(&head, 10);
     insert(&head, 9);
     insert(&head, 5);
-    insert(&head, 8);
-    insert(&head, 3);
     insert(&head, 2);
-    insert(&head, 4);
+    insert(&head, 3);
+    insert(&head, 1);
+    insert(&head, 6);
     display(head);
     cout << endl;
     Node *ptr1 = new Node();
@@ -88,4 +88,6 @@ int main(void)
     ptr2 = head;
     ptr2 = func(ptr1, ptr2);
     display(head);
+
+    // 9996626001
 }
