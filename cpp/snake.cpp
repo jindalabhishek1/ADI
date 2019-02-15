@@ -20,6 +20,12 @@ struct Food
     char value = 'F';
 } *food;
 
+struct Snake
+{
+    Node * ptr = NULL;
+    int length = 0;
+};
+
 Node * NewNode(int x, int y, char value)
 {
     Node *newNode = new Node();
@@ -72,6 +78,16 @@ void displayBoard(char **board)
         }
         cout << endl;
     }
+}
+
+void detectFoodColision(Food *food)
+{
+
+}
+
+void saveNode(Node **head_ref)
+{
+    
 }
 
 char createSnake(char flag)
@@ -308,7 +324,8 @@ int main()
     // displayBoard(board);
     food = createFood();
     // cout << food->x << " " << food->y << " " << food->value << endl;
-    flag = createSnake(flag);
+    Snake *snake  = new Snake[rows];
+    flag = createSnake(flag, snake);
     projectSnake(board, &head);
     projectFood(board, food);
     displayList(head);
