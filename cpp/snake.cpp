@@ -22,26 +22,63 @@ struct Food
 
 struct Snake
 {
-    Node * ptr = NULL;
+    Node * head = NULL;
     int length = 0;
 };
 
-Node * NewNode(int x, int y, char value)
+Node * NewNode(int x, int y)
 {
     Node *newNode = new Node();
     newNode->x = x;
     newNode->y = y;
-    newNode->value = value;
+    newNode->value = '#';
     newNode->next = NULL;
     return newNode;
 }
 
-Food *createFood()
+void insert(Node **head_ref, Node *temp)
 {
-    srand(time(0));
+    Node *last = *head_ref;
+    Node *newNode = NewNode(temp->x, temp->y);
+    if (*head_ref == NULL)
+    {
+        *head_ref = newNode;
+        return;
+    }
+    while (last->next != NULL)
+    {
+        last = last->next;
+    }
+    last->next = newNode;
+    return;
+}
+
+bool checkExist(Snake *snake, int x, int y)
+{
+    Node **temp = &snake[x].head;
+    Node *last = *temp;
+    int count = snake[x].length;
+    while (count--)
+    {
+        if (last->y == y)
+        {
+            return true;
+        }
+        last = last->next;
+    }
+    return false;
+}
+
+Food *createFood(Snake *snake)
+{
     Food *newFood = new Food();
-    newFood->x = rand() % (rows - 1);
-    newFood->y = rand() % (cols - 1);
+    do
+    {
+        srand(time(0));
+        newFood->x = rand() % (rows - 1);
+        newFood->y = rand() % (cols - 1);
+    }
+    while (checkExist(snake, newFood->x, newFood->y));
     return newFood;
 }
 
@@ -66,6 +103,7 @@ void displayList(Node *head)
         cout << head->x << " " << head->y << " " << head->value << endl;
         head = head->next;
     }
+    cout << endl;
 }
 
 void displayBoard(char **board)
@@ -80,25 +118,102 @@ void displayBoard(char **board)
     }
 }
 
-void detectFoodColision(Food *food)
+void displaySnake(Snake *snake)
 {
-
+    cout << "Snake: \n";
+    for (int i = 0; i < rows; i++)
+    {
+        cout << i << ": ";
+        Node *temp = snake[i].head;
+        while (temp != NULL)
+        {
+            cout << temp->x << " " << temp->y << " " << temp->value << "-->";
+            temp = temp->next;
+        }
+        cout << endl;
+    }
 }
 
-void saveNode(Node **head_ref)
+void saveNode(Snake *snake, Node *temp)
 {
-    
+    cout << temp->x << " " << temp->y << endl;
+    if (checkExist(snake, temp->x, temp->y))
+    {
+        return;
+    }
+
+    cout << "SaveNode:Before:Add:\n";
+    displayList(snake[temp->x].head);
+    cout << endl;
+
+    insert(&snake[temp->x].head, temp);
+
+    cout << "SaveNode:After:Add:\n";
+    displayList(snake[temp->x].head);
+    cout << endl;
+
+    snake[temp->x].length++;
+    return;
 }
 
-char createSnake(char flag)
+void saveSnake(Snake *snake, Node **head_ref)
 {
-    head = NewNode(4, 5, 'H');
+    Node *temp = *head_ref;
+    while(temp != NULL)
+    {
+        saveNode(snake, temp);
+        temp = temp->next;
+    }
+}
+
+void deleteNode(Snake *snake, Node *current)
+{
+    Node **temp = &snake[current->x].head;
+    Node *last = *temp;
+    Node *prev = *temp;
+    int count = snake[current->x].length;
+    if (last->y == current->y)
+    {
+        Node *ptr = last;
+        snake[current->x].head = ptr->next;
+        // cout << "prev: " << prev->x << " " << prev->y << "\n";
+        free(ptr);
+        snake[current->x].length--;
+        return;
+    }
+    last = last->next;
+    count--;
+    while(count--)
+    {
+        // cout << "prev: " << prev->x << " " << prev->y << "\n";
+        // cout << "last: " << last->x << " " << last->y << "\n";
+        if (last->y == current->y)
+        {
+            Node *ptr = last;
+            // cout << "ptr: " << ptr->x << " " << ptr->y << "\n";
+            prev->next = ptr->next;
+            // cout << "prev: " << prev->x << " " << prev->y << "\n";
+            free(ptr);
+            snake[current->x].length--;
+            return;
+        }
+        prev = last;
+        last = last->next;
+    }
+}
+
+char createSnake(char flag, Snake *snake)
+{
+    head = NewNode(4, 5);
+    head->value = 'H';
     Node *newNode = new Node();
-    newNode = NewNode(4, 6, '#');
+    newNode = NewNode(4, 6);
     head->next = newNode;
-    tail = NewNode(4, 7, 'T');
+    tail = NewNode(4, 7);
+    tail->value = 'T';
     newNode->next = tail;
     flag = 'a';
+    saveSnake(snake, &head);
     return flag;
 }
 
@@ -128,21 +243,34 @@ void projectSnake(char **board, Node **head_ref)
     }
 }
 
-void updateSnake(Node *temp)
+Node * updateSnake(Node *temp)
 {
-    // Node *last = NULL;
+    Node *last;
     // Node *current = temp;
     if (temp->next == NULL)
     {
         // return current->next;
-        return;
+        last = NewNode(temp->x, temp->y);
+        return last;
     }
-    updateSnake(temp->next);
+    last = updateSnake(temp->next);
     temp->next->x = temp->x;
     temp->next->y = temp->y;
+    return last;
 }
 
-void moveSnake(Node **head_ref, char **board, Food *food, char flag)
+bool checkCollision(Snake *snake, Node *head)
+{
+    if (checkExist(snake, head->x, head->y))
+    {
+        cout << "Game Ended!!!!!!\n";
+        return true;
+    }
+    return false;
+
+}
+
+void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char flag)
 {
     Node *temp = *head_ref;
     char choice;
@@ -150,6 +278,7 @@ void moveSnake(Node **head_ref, char **board, Food *food, char flag)
     cin >> choice;
     while (choice != 'x' && choice != 'X')
     {
+        Node *last;
         switch (choice)
         {
             case 'W':
@@ -157,26 +286,12 @@ void moveSnake(Node **head_ref, char **board, Food *food, char flag)
                 // if (temp->x - temp->next->x > 0)
                 if (flag == 's')
                 {
-                    // cout << "temp->x = " << temp->x << " temp->next->x = " << temp->next->x << endl;
                     cout << "Not Allowed\n";
-                    // cout << flag << endl;
                 }
                 else
                 {
-                    Node *prev = *head_ref;
-                    /*
-                    while (temp->next != NULL)
-                    {
-                        temp->next->x = temp->x;
-                        temp->next->y = temp->y;
-                        // temp->next->value = temp->value;
-                        // prev->x = prev->x - 1;
-                        temp = temp->next;
-                        // prev = prev->next;
-                    }
-                    */
-                    updateSnake(prev);
-                    // prev->x = prev->x -1;
+                    Node *prev = temp;
+                    last = updateSnake(prev);
                     if (prev->x == 0)
                     {
                         prev->x = rows - 1;
@@ -195,28 +310,11 @@ void moveSnake(Node **head_ref, char **board, Food *food, char flag)
                 if (flag == 'w')
                 {
                     cout << "Not Allowed\n";
-                    // cout << flag << endl;
                 }
                 else
                 {
-                    Node *prev = *head_ref;
-                    // cout << "prev:" << prev->x << " " << prev->y << " " << prev->value << endl;
-                    /*
-                    while (temp->next->next != NULL)
-                    {
-                        // updateSnake(temp);
-                        // cout << last->x << " " << last->y << " " << last->value << endl;
-                        // cout << last->next->x << " " <<  last->next->y << " " << last->next->value << endl;
-                        // cout << temp->x << " " << temp->y << " " << temp->value << endl;
-                        // cout << temp->next->x << " " <<  temp->next->y << " " << temp->next->value << endl;
-                        // temp->next->value = temp->value;
-                        // prev->x = prev->x + 1;
-                        // temp = temp->next;
-                        // prev = prev->next;
-                        // cout << endl;
-                    }
-                    */
-                    updateSnake(prev);
+                    Node *prev = temp;
+                    last = updateSnake(prev);
                     // prev->x = prev->x + 1;
                     if (prev->x == rows - 1)
                     {
@@ -236,25 +334,11 @@ void moveSnake(Node **head_ref, char **board, Food *food, char flag)
                 if (flag == 'd')
                 {
                     cout << "Not Allowed\n";
-                    // cout << flag << endl;
                 }
                 else
                 {
-                    Node *prev = *head_ref;
-                    updateSnake(prev);
-                    /*
-                    while (temp->next != NULL)
-                    {
-                        temp->next->x = temp->x;
-                        temp->next->y = temp->y;
-                        // temp->next->value = temp->value;
-                        // prev->y = prev->y - 1;
-                        temp = temp->next;
-                        // prev = prev->next;
-                    }
-                    */
-
-                    // prev->y = prev->y - 1;
+                    Node *prev = temp;
+                    last = updateSnake(prev);
                     if (prev->y == 0)
                     {
                         prev->y = cols - 1;
@@ -273,24 +357,11 @@ void moveSnake(Node **head_ref, char **board, Food *food, char flag)
                 if (flag == 'a')
                 {
                     cout << "Not Allowed\n";
-                    // cout << flag << endl;
                 }
                 else
                 {
-                    Node *prev = *head_ref;
-                    updateSnake(prev);
-                    /*
-                    while (temp->next != NULL)
-                    {
-                        temp->next->x = temp->x;
-                        temp->next->y = temp->y;
-                        // temp->next->value = temp->value;
-                        // prev->y = prev->y + 1;
-                        temp = temp->next;
-                        // prev = prev->next;
-                    }
-                    */
-                    // prev->y = prev->y + 1;
+                    Node *prev = temp;
+                    last = updateSnake(prev);
                     if (prev->y == cols - 1)
                     {
                         prev->y = 0;
@@ -304,31 +375,68 @@ void moveSnake(Node **head_ref, char **board, Food *food, char flag)
                 displayList(temp);
                 break;
             default:
-                // cout << "Enter the correct choice";
                 break;
         }
+        /*
+            * The only problem with this part() in code is that
+            * the food may be created on the same place as 'H'(head),
+            * because 'H' node is updated later.
+        */
+        if (temp->x == food->x && temp->y == food->y)
+        {
+            Node *ptr = temp;
+            cout << "Entered\n";
+            cout << "last:" << last->x << " " << last->y << " " << last->value << endl;
+            Node *newNode = NewNode(last->x, last->y);
+            newNode->value = 'T';
+            while(ptr->next != NULL)
+            {
+                ptr = ptr->next;
+            }
+            ptr->value = '#';
+            ptr->next = newNode;
+            food = createFood(snake);
+        }
+        else
+        {
+
+            cout << "MoveFunc:Before:Delete:\n";
+            cout << last->x << " " << last->y << "\n";
+            cout << endl;
+
+            deleteNode(snake, last);
+        }
+
         clearBoard(board);
         projectFood(board, food);
         projectSnake(board, &temp);
         displayBoard(board);
+        cout << endl;
+        if (checkCollision(snake, temp))
+        {
+            return;
+        }
+        saveNode(snake, temp);
+        displaySnake(snake);
         cout << "Enter:- w: forward, s: backward, a: left, d: right\n";
         cin >> choice;
     }
-
 }
 
 int main()
 {
     char flag;
+    Snake *snake  = new Snake[rows];
     char **board = createBoard();
     // displayBoard(board);
-    food = createFood();
+    food = createFood(snake);
     // cout << food->x << " " << food->y << " " << food->value << endl;
-    Snake *snake  = new Snake[rows];
     flag = createSnake(flag, snake);
     projectSnake(board, &head);
     projectFood(board, food);
     displayList(head);
     displayBoard(board);
-    moveSnake(&head, board, food, flag);
+    cout << "SNAKE LIST:\n";
+    displayList(snake[3].head);
+    moveSnake(snake, &head, board, food, flag);
 }
