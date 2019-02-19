@@ -274,8 +274,10 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
 {
     Node *temp = *head_ref;
     char choice;
+    bool createfood;
     do
     {
+        createfood = false;
         cout << "Enter:- w: forward, s: backward, a: left, d: right\n";
         cin >> choice;
         Node *last;
@@ -383,11 +385,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                 continue;
                 break;
         }
-        /*
-            * The only problem with this part() in code is that
-            * the food may be created on the same place as 'H'(head),
-            * because 'H' node is updated later.
-        */
+        
         if (temp->x == food->x && temp->y == food->y)
         {
             Node *ptr = temp;
@@ -401,7 +399,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
             }
             ptr->value = '#';
             ptr->next = newNode;
-            food = createFood(snake);
+            createfood = true;
         }
         else
         {
@@ -412,16 +410,22 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
             deleteNode(snake, last);
         }
 
-        clearBoard(board);
-        projectFood(board, food);
-        projectSnake(board, &temp);
-        displayBoard(board);
-        cout << endl;
+        // cout << endl;
         if (checkCollision(snake, temp))
         {
             return;
         }
+
         saveNode(snake, temp);
+        if (createfood)
+        {
+            food = createFood(snake);
+        }
+        clearBoard(board);
+        projectFood(board, food);
+        projectSnake(board, &temp);
+        displayBoard(board);
+
         // displaySnake(snake);
         // cout << "Enter:- w: forward, s: backward, a: left, d: right\n";
         // cin >> choice;
