@@ -136,21 +136,21 @@ void displaySnake(Snake *snake)
 
 void saveNode(Snake *snake, Node *temp)
 {
-    cout << temp->x << " " << temp->y << endl;
+    // cout << temp->x << " " << temp->y << endl;
     if (checkExist(snake, temp->x, temp->y))
     {
         return;
     }
 
-    cout << "SaveNode:Before:Add:\n";
-    displayList(snake[temp->x].head);
-    cout << endl;
+    // cout << "SaveNode:Before:Add:\n";
+    // displayList(snake[temp->x].head);
+    // cout << endl;
 
     insert(&snake[temp->x].head, temp);
 
-    cout << "SaveNode:After:Add:\n";
-    displayList(snake[temp->x].head);
-    cout << endl;
+    // cout << "SaveNode:After:Add:\n";
+    // displayList(snake[temp->x].head);
+    // cout << endl;
 
     snake[temp->x].length++;
     return;
@@ -274,10 +274,10 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
 {
     Node *temp = *head_ref;
     char choice;
-    cout << "Enter:- w: forward, s: backward, a: left, d: right\n";
-    cin >> choice;
-    while (choice != 'x' && choice != 'X')
+    do
     {
+        cout << "Enter:- w: forward, s: backward, a: left, d: right\n";
+        cin >> choice;
         Node *last;
         switch (choice)
         {
@@ -302,7 +302,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                     }
                     flag = 'w';
                 }
-                displayList(temp);
+                // displayList(temp);
                 break;
             case 'S':
             case 's':
@@ -326,7 +326,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                     }
                     flag = 's';
                 }
-                displayList(temp);
+                // displayList(temp);
                 break;
             case 'A':
             case 'a':
@@ -349,7 +349,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                     }
                     flag = 'a';
                 }
-                displayList(temp);
+                // displayList(temp);
                 break;
             case 'D':
             case 'd':
@@ -372,9 +372,11 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                     }
                     flag = 'd';
                 }
-                displayList(temp);
+                // displayList(temp);
                 break;
             default:
+                cout << "Wrong choice\n";
+                continue;
                 break;
         }
         /*
@@ -385,8 +387,8 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
         if (temp->x == food->x && temp->y == food->y)
         {
             Node *ptr = temp;
-            cout << "Entered\n";
-            cout << "last:" << last->x << " " << last->y << " " << last->value << endl;
+            // cout << "Entered\n";
+            // cout << "last:" << last->x << " " << last->y << " " << last->value << endl;
             Node *newNode = NewNode(last->x, last->y);
             newNode->value = 'T';
             while(ptr->next != NULL)
@@ -399,10 +401,9 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
         }
         else
         {
-
-            cout << "MoveFunc:Before:Delete:\n";
-            cout << last->x << " " << last->y << "\n";
-            cout << endl;
+            // cout << "MoveFunc:Before:Delete:\n";
+            // cout << last->x << " " << last->y << "\n";
+            // cout << endl;
 
             deleteNode(snake, last);
         }
@@ -417,10 +418,12 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
             return;
         }
         saveNode(snake, temp);
-        displaySnake(snake);
-        cout << "Enter:- w: forward, s: backward, a: left, d: right\n";
-        cin >> choice;
+        // displaySnake(snake);
+        // cout << "Enter:- w: forward, s: backward, a: left, d: right\n";
+        // cin >> choice;
     }
+    while (choice != 'x' && choice != 'X');
+    cout << "Thanks For playing!!!!\n";
 }
 
 int main()
@@ -434,9 +437,9 @@ int main()
     flag = createSnake(flag, snake);
     projectSnake(board, &head);
     projectFood(board, food);
-    displayList(head);
+    // displayList(head);
     displayBoard(board);
     cout << "SNAKE LIST:\n";
-    displayList(snake[3].head);
+    // displayList(snake[3].head);
     moveSnake(snake, &head, board, food, flag);
 }
