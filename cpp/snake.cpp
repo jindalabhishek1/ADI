@@ -287,6 +287,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                 if (flag == 's')
                 {
                     cout << "Not Allowed\n";
+                    continue;
                 }
                 else
                 {
@@ -310,6 +311,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                 if (flag == 'w')
                 {
                     cout << "Not Allowed\n";
+                    continue;
                 }
                 else
                 {
@@ -334,6 +336,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                 if (flag == 'd')
                 {
                     cout << "Not Allowed\n";
+                    continue;
                 }
                 else
                 {
@@ -357,6 +360,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                 if (flag == 'a')
                 {
                     cout << "Not Allowed\n";
+                    continue;
                 }
                 else
                 {
