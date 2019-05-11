@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <time.h>
 using namespace std;
 
 #define rows 10
@@ -385,7 +386,7 @@ void moveSnake(Snake *snake, Node **head_ref, char **board, Food *food, char fla
                 continue;
                 break;
         }
-        
+
         if (temp->x == food->x && temp->y == food->y)
         {
             Node *ptr = temp;
