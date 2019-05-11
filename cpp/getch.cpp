@@ -10,7 +10,7 @@ int main()
         cout << "enter something:\t";       
         if (!kbhit())
         {
-            cout << "keystrok " << getch() << " hit. Thanks\n";
+            cout << "keystrok " << (char)getch() << " hit. Thanks\n";
             break;
         }
     }
